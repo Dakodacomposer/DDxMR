@@ -1,0 +1,53 @@
+extends Control
+
+
+#region Ready & Process
+func _ready() -> void:
+	$Foreground/Train/VBoxContainer.visible = false
+	$Foreground/Scavenge/VBoxContainer.visible = false
+
+
+func _process(_delta: float) -> void:
+	update_health_stress_gold()
+
+
+#endregion
+
+func gain_hp(amount):
+	RunManager.current_health += amount
+	
+#ADD MAX HP CLAMPS AND ADD NO LESS THAN 0 GOLD CLAMP
+func update_health_stress_gold():
+	$Foreground/HBoxContainer/Health.text = str("Health: ", RunManager.current_health)
+	$Foreground/HBoxContainer/Stress.text = str("Stress: ", RunManager.current_stress)
+	$Foreground/HBoxContainer/Gold.text = str("Gold: ", RunManager.current_gold)
+	
+#region Train Buttons
+
+func _on_train_pressed() -> void:
+	$Foreground/Train/VBoxContainer.visible = true
+
+
+func _on_strength_pressed() -> void:
+	get_tree().change_scene_to_file("res://Scenes/training_room_strength.tscn")
+#endregion
+
+
+#region Scavenge Buttons
+func _on_scavenge_pressed() -> void:
+	$Foreground/Scavenge/VBoxContainer.visible = true
+
+
+func _on_scrape_barrels_pressed() -> void:
+	gain_hp(4)
+
+
+func _on_roadkill_pressed() -> void:
+	RunManager.current_stress += 5
+
+
+func _on_lamb_roast_pressed() -> void:
+	RunManager.current_gold -= 5
+
+
+#endregion
