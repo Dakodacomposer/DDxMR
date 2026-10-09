@@ -1,0 +1,25 @@
+extends Node2D
+
+
+
+func _ready() -> void:
+	$CanvasLayer/Control/CurrentStrength.text = str("Strength :", RunManager.current_strength)
+	$WarriorUnit/AnimatedSprite2D.animation_finished.connect(_on_animation_finished)
+	$WarriorUnit/AnimatedSprite2D.play("Attack")
+
+
+func _on_animation_finished():
+	increment_stregth(1)
+	update_strength_label()
+	$Timer.start()
+
+func increment_stregth(_amount):
+	RunManager.current_strength += 1
+
+func update_strength_label():
+	$CanvasLayer/Control/CurrentStrength.text = str("Strength :", RunManager.current_strength)
+
+
+
+func _on_timer_timeout() -> void:
+	get_tree().change_scene_to_file("res://Scenes/town_hub.tscn")
