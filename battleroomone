@@ -1,0 +1,18 @@
+extends Control
+
+
+var energy_count: int = 4
+@onready var enemy = $EnemyDuringBattle
+
+
+func _ready() -> void:
+	update_energy()
+
+func update_energy():
+	$Energy.text = str("Energy: ", energy_count)
+
+func _on_attack_button_1_pressed() -> void:
+	if energy_count >= 1:
+		energy_count = clampi(energy_count - 1, 0, 4)
+		update_energy()
+		enemy.take_damage(5)
