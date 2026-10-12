@@ -1,0 +1,12 @@
+extends Control
+
+
+func _ready() -> void:
+	$HealthBar.update_health(RunManager.current_health)
+
+
+func take_damage(amount: int) -> void:
+	RunManager.current_health = clampi(
+		RunManager.current_health - amount, 0, 100
+	)
+	$HealthBar.update_health(RunManager.current_health)
