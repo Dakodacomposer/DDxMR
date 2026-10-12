@@ -1,0 +1,13 @@
+extends Control
+
+var current_health: int = 100
+
+
+func _ready() -> void:
+	$HealthBar.update_health(current_health)
+
+
+func take_damage(amount: int) -> void:
+	current_health = clampi(current_health - amount, 0, 100)
+	$HealthBar.update_health(current_health)
+	
