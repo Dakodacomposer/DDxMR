@@ -11,8 +11,37 @@ func _ready() -> void:
 func update_energy():
 	$Energy.text = str("Energy: ", energy_count)
 
+
+
+#region Attack Buttons
+
 func _on_attack_button_1_pressed() -> void:
 	if energy_count >= 1:
 		energy_count = clampi(energy_count - 1, 0, 4)
 		update_energy()
 		enemy.take_damage(5)
+
+
+
+func _on_attack_button_2_pressed() -> void:
+	if energy_count >= 2:
+		energy_count = clampi(energy_count - 2, 0, 4)
+		update_energy()
+		enemy.take_damage(10)
+		
+		
+
+
+func _on_attack_button_3_pressed() -> void:
+	if energy_count >= 3:
+		energy_count = clampi(energy_count - 3, 0, 4)
+		update_energy()
+		enemy.take_damage(15)
+
+
+func _on_attack_button_4_pressed() -> void:
+	if energy_count >= 4:
+		energy_count = clampi(energy_count - 4, 0, 4)
+		update_energy()
+		enemy.take_damage(20)
+#endregion
