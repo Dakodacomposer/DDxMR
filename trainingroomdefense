@@ -1,0 +1,23 @@
+extends Node2D
+
+
+
+func _ready() -> void:
+	$WarriorUnit/AnimatedSprite2D.play("Idle")
+	update_label()
+
+
+func increment_defense(amount):
+	RunManager.current_defense += amount
+
+
+func _on_rock_rock_hit() -> void:
+	increment_defense(1)
+	update_label()
+	$Timer.start()
+
+func update_label():
+	$CanvasLayer/Control/Label.text = str("Defense: ", RunManager.current_defense)
+
+func _on_timer_timeout() -> void:
+	get_tree().change_scene_to_file("res://Scenes/town_hub.tscn")
