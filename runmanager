@@ -6,8 +6,30 @@ var current_defense: int = 5
 var current_speed: int = 5
 var current_stress: int = 0
 var current_gold: int = 3
+var scrape_barrel_count: int = 0
 
 
-func _process(_delta: float) -> void:
-	if current_health >= 100:
-		current_health = 100
+#ABILITIES------------------------------------------------------------
+var hunger_drive: bool = false
+var swift_sheild: bool = false
+
+
+func ability_check():
+	gain_ability_hunger_drive()
+	gail_ability_swift_sheild()
+
+#this could use ANDs instead of nested ifs
+func gain_ability_hunger_drive():
+	if current_strength >= 7:
+		if scrape_barrel_count >= 3:
+			if hunger_drive == false:
+				hunger_drive = true
+				print("hunger drive aquired")
+				
+				
+func gail_ability_swift_sheild():
+	if current_speed >= 7:
+		if current_defense >= 7:
+			if swift_sheild == false:
+				swift_sheild = true
+				print("swift sheild aquired")
