@@ -5,10 +5,20 @@ func _ready() -> void:
 	$Foreground/Train/VBoxContainer.visible = false
 	$Foreground/Scavenge/VBoxContainer.visible = false
 	RunManager.ability_check()
-
-
+	$KnightSheet.hide()
+	$KnightSheet/Stats/Strength.text = str("Strength: ", RunManager.current_strength)
+	$KnightSheet/Stats/Defense.text = str("Defense: ", RunManager.current_defense)
+	$KnightSheet/Stats/Speed.text = str("Speed: ", RunManager.current_speed)
+	$KnightSheet/Passives/GymRat.hide()
+	update_time_count()
+	update_day_count()
+	if RunManager.time_count <= 0:
+		end_day()
+	
 func _process(_delta: float) -> void:
 	update_health_stress_gold()
+	update_time_count()
+
 
 
 #endregion
@@ -20,13 +30,22 @@ func _on_train_pressed() -> void:
 	
 	
 func _on_speed_pressed() -> void:
-	get_tree().change_scene_to_file("res://Scenes/training_room_speed.tscn")
-
+	if RunManager.time_count >= 2:
+		get_tree().change_scene_to_file("res://Scenes/training_room_speed.tscn")
+		RunManager.time_count -=2
+		
+		
 func _on_defense_pressed() -> void:
-	get_tree().change_scene_to_file("res://Scenes/training_room_defense.tscn")
-
+	if RunManager.time_count >= 2:
+		get_tree().change_scene_to_file("res://Scenes/training_room_defense.tscn")
+		RunManager.time_count -=2
+		
+		
 func _on_strength_pressed() -> void:
-	get_tree().change_scene_to_file("res://Scenes/training_room_strength.tscn")
+	if RunManager.time_count >= 2:
+		get_tree().change_scene_to_file("res://Scenes/training_room_strength.tscn")
+		RunManager.time_count -=2
+		
 #endregion
 
 #region Scavenge Buttons
@@ -67,3 +86,63 @@ func update_health_stress_gold():
 	
 	
 	
+
+
+func _on_knight_portrait_mouse_entered() -> void:
+	var tween = create_tween()
+	tween.tween_property($KnightPortrait, "position:x", 1040, 0.3)
+
+
+func _on_knight_portrait_mouse_exited() -> void:
+	var tween = create_tween()
+	tween.tween_property($KnightPortrait, "position:x", 1053, 0.3)
+
+
+func _on_knight_portrait_pressed() -> void:
+	$KnightSheet.show()
+	if RunManager.gym_rat == true:
+		$KnightSheet/Passives/GymRat.show()
+
+
+
+
+
+func _on_close_button_pressed() -> void:
+	$KnightSheet.hide()
+	
+	#add if 0, play day end
+func update_time_count():
+	$TimeLabel.text = str("Time: ", RunManager.time_count)
+
+
+func _on_journey_pressed() -> void:
+	get_tree().change_scene_to_file("res://Scenes/journey.tscn")
+	RunManager.time_count = 0
+	
+	
+func update_day_count():
+	$DayLabel.text = str("Day: ", RunManager.day_count)
+	
+	
+func end_day():
+	if $DayTransition/Fade.mouse_filter == MOUSE_FILTER_IGNORE:
+		$DayTransition/Fade.mouse_filter = MOUSE_FILTER_STOP
+	var tween = create_tween()
+	tween.tween_property($DayTransition/Fade, "color:a", 1.0, 2.4)
+	RunManager.day_count += 1
+	
+	await tween.finished
+	
+	RunManager.time_count = 10
+	update_time_count()
+	
+	var fade_in = create_tween()
+	fade_in.tween_property($DayTransition/Fade, "color:a", 0.0, 2.4)
+	
+	await fade_in.finished
+	$DayTransition/Fade.mouse_filter = MOUSE_FILTER_IGNORE
+	update_day_count()
+
+
+func _on_end_day_pressed() -> void:
+	end_day()
