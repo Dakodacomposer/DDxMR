@@ -7,16 +7,20 @@ var current_speed: int = 5
 var current_stress: int = 0
 var current_gold: int = 3
 var scrape_barrel_count: int = 0
+var time_count: int = 10
+var day_count: int = 1
+
 
 
 #ABILITIES------------------------------------------------------------
 var hunger_drive: bool = false
 var swift_sheild: bool = false
 
-
+#make sure to add new abilities and passives to here
 func ability_check():
 	gain_ability_hunger_drive()
-	gail_ability_swift_sheild()
+	gain_ability_swift_sheild()
+	gain_passive_gym_rat()
 
 #this could use ANDs instead of nested ifs
 func gain_ability_hunger_drive():
@@ -27,9 +31,24 @@ func gain_ability_hunger_drive():
 				print("hunger drive aquired")
 				
 				
-func gail_ability_swift_sheild():
+func gain_ability_swift_sheild():
 	if current_speed >= 7:
 		if current_defense >= 7:
 			if swift_sheild == false:
 				swift_sheild = true
 				print("swift sheild aquired")
+				
+				
+#PASSIVES------------------------------------------------------------------
+var gym_rat: bool = false
+
+func gain_passive_gym_rat():
+	if gym_rat == false:
+		if current_strength >= 10:
+			gym_rat = true
+			print("gym rat passive gained")
+		
+func gym_rat_passive() -> int:
+	if gym_rat == true:
+		return 1
+	return 0
