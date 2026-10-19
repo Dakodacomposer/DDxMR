@@ -1,0 +1,24 @@
+extends Control
+
+@onready var path_follow = $Path2D/PathFollow2D
+
+
+
+func _on_stop_one_pressed() -> void:
+	var tween = create_tween()
+	tween.tween_property(path_follow, "progress", 168.7, 2.0)
+
+
+func _on_stop_two_pressed() -> void:
+	var tween = create_tween()
+	tween.tween_property(path_follow, "progress", 1113.1, 2.0)
+
+
+func _on_stop_three_pressed() -> void:
+	var tween = create_tween()
+	tween.tween_property(path_follow, "progress", 1856.72, 2.5)
+
+
+func _on_end_journey_pressed() -> void:
+	get_tree().change_scene_to_file("res://Scenes/town_hub.tscn")
+	
