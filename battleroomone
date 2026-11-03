@@ -1,61 +1,110 @@
 extends Control
 
 
-var energy_count: int = 4
-@onready var enemy = $EnemyDuringBattle
+@onready var enemy = $Enemy1DuringBattle
 @onready var player = $PlayerDuringBattle
+
+var player_turn: bool = true
+
+var parry_and_opened_active: bool = false
+var relentless_pursuit_active: bool = false
 
 
 func _ready() -> void:
-	update_energy()
+	update_stat_labels()
+	$StatsPanel.hide()
 
-func update_energy():
-	$Energy.text = str("Energy: ", energy_count)
-
-
-
-#region Attack Buttons
-
-func _on_attack_button_1_pressed() -> void:
-	if energy_count >= 1:
-		energy_count = clampi(energy_count - 1, 0, 4)
-		update_energy()
-		enemy.take_damage(5)
-
-
-
-func _on_attack_button_2_pressed() -> void:
-	if energy_count >= 2:
-		energy_count = clampi(energy_count - 2, 0, 4)
-		update_energy()
-		enemy.take_damage(10)
-		
-		
-
-
-func _on_attack_button_3_pressed() -> void:
-	if energy_count >= 3:
-		energy_count = clampi(energy_count - 3, 0, 4)
-		update_energy()
-		enemy.take_damage(15)
-
-
-func _on_attack_button_4_pressed() -> void:
-	if energy_count >= 4:
-		energy_count = clampi(energy_count - 4, 0, 4)
-		update_energy()
-		enemy.take_damage(20)
-#endregion
-
-
-func _on_end_turn_pressed() -> void:
-	$EndTurnTimer.start()
 
 
 
 
 func _on_end_turn_timer_timeout() -> void:
-	player.take_damage(randi_range(10, 20))
-	energy_count = clampi(energy_count + 1, 0, 4)
-	energy_count += 1
-	update_energy()
+	enemy.attack()
+	if relentless_pursuit_active:
+		relentless_pursuit_active = false
+		$EndTurnTimer.start()
+	else:
+		player_turn = true
+
+
+
+func _on_dash_attack_pressed() -> void:
+	if player_turn == true:
+		RunManager.temp_strength += 1
+		if parry_and_opened_active == true:
+			enemy.take_damage((15 + RunManager.get_combined_strength() * 2) * 2)
+			parry_and_opened_active = false
+			player_turn = false
+			$EndTurnTimer.start()
+		else:
+			enemy.take_damage(15 + (RunManager.get_combined_strength() * 2))
+			player_turn = false
+			$EndTurnTimer.start()
+		print(enemy.current_health)
+		print("run manager temp strength: ", RunManager.temp_strength)
+		print(RunManager.get_combined_strength())
+
+
+func _on_suplex_pressed() -> void:
+	if player_turn == true:
+		RunManager.temp_defense += 1
+		if parry_and_opened_active == true:
+			enemy.take_damage((15 + RunManager.get_combined_defense()
+			 + RunManager.get_combined_strength()) * 2)
+			parry_and_opened_active = false
+			player_turn = false
+			$EndTurnTimer.start()
+		else:
+			enemy.take_damage(15 + (RunManager.get_combined_defense()
+		 	+ RunManager.get_combined_strength()))
+			player_turn = false
+			$EndTurnTimer.start()
+		print(enemy.current_health)
+		print("combined strength: ", RunManager.get_combined_strength())
+		print("combined defense: ", RunManager.get_combined_defense())
+
+
+#dont forget to wire the enemy to hit 1.5x if active
+func _on_parry_and_open_pressed() -> void:
+	if player_turn == true:
+		parry_and_opened_active = true
+		RunManager.temp_speed += 1
+		RunManager.temp_strength += 1
+		player_turn = false
+		$EndTurnTimer.start()
+		
+
+#wire in lose next turn
+func _on_relentless_pursuit_pressed() -> void:
+	if player_turn == true:
+		if parry_and_opened_active == true:
+			enemy.take_damage((25 + RunManager.get_combined_defense() + 
+			RunManager.get_combined_speed() + RunManager.get_combined_strength())
+			* 2)
+			parry_and_opened_active = false
+			player_turn = false
+			relentless_pursuit_active = true
+			$EndTurnTimer.start()
+		else:
+			enemy.take_damage(25 + (RunManager.get_combined_defense() + 
+			RunManager.get_combined_speed() + RunManager.get_combined_strength())
+			)
+			player_turn = false
+			relentless_pursuit_active = true
+			$EndTurnTimer.start()
+		print(enemy.current_health)
+
+
+func update_stat_labels():
+	$StatsPanel/Strength.text = str("Strength: ", RunManager.current_strength, " + ", "(", RunManager.temp_strength, ")")
+	$StatsPanel/Defense.text = str("Defense: ", RunManager.current_defense, " + ", "(", RunManager.temp_defense, ")")
+	$StatsPanel/Speed.text = str("Speed: ", RunManager.current_speed, " + ", "(", RunManager.temp_speed, ")")
+
+
+
+func _on_check_stats_pressed() -> void:
+	$StatsPanel.show()
+
+
+func _on_close_pressed() -> void:
+	$StatsPanel.hide()
