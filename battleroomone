@@ -27,22 +27,27 @@ func _on_end_turn_timer_timeout() -> void:
 		player_turn = true
 
 
-
+#CHANGE DASH ATTACK TO IMPLEMENT TEMP VALUES
 func _on_dash_attack_pressed() -> void:
 	if player_turn == true:
-		RunManager.temp_strength += 1
+		#WHY IS STRENGTH INCREMEMNTING
+		#RunManager.temp_strength += 1
+			#establish base damage first
+			#use helper funcs to check if passives increase dmg below
+		var damage = 15 + RunManager.get_combined_strength() * 2
+		damage += RunManager.get_passive_bonus_damage()
+			
+			#check if parry and open active
 		if parry_and_opened_active == true:
-			enemy.take_damage((15 + RunManager.get_combined_strength() * 2) * 2)
+			damage *= 2
 			parry_and_opened_active = false
-			player_turn = false
-			$EndTurnTimer.start()
-		else:
-			enemy.take_damage(15 + (RunManager.get_combined_strength() * 2))
-			player_turn = false
-			$EndTurnTimer.start()
+			
+			#take final dmg and cleanup
+		enemy.take_damage(damage)
+		player_turn = false
+		apply_stalwart()
+		$EndTurnTimer.start()
 		print(enemy.current_health)
-		print("run manager temp strength: ", RunManager.temp_strength)
-		print(RunManager.get_combined_strength())
 
 
 func _on_suplex_pressed() -> void:
@@ -93,6 +98,11 @@ func _on_relentless_pursuit_pressed() -> void:
 			relentless_pursuit_active = true
 			$EndTurnTimer.start()
 		print(enemy.current_health)
+
+
+func apply_stalwart() -> void:
+	if RunManager.stalwart:
+		player.gain_shield(10)
 
 
 func update_stat_labels():
