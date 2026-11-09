@@ -8,11 +8,19 @@ var player_turn: bool = true
 
 var parry_and_opened_active: bool = false
 var relentless_pursuit_active: bool = false
+var first_attack: bool = false
 
 
 func _ready() -> void:
 	update_stat_labels()
 	$StatsPanel.hide()
+	$PassivesPanel.hide()
+	update_passive_panel()
+	if RunManager.libra:
+		RunManager.temp_defense += 2
+		RunManager.temp_speed += 2
+		RunManager.temp_strength += 2
+		print("libra temp stats gained")
 
 
 
@@ -27,15 +35,21 @@ func _on_end_turn_timer_timeout() -> void:
 		player_turn = true
 
 
-#CHANGE DASH ATTACK TO IMPLEMENT TEMP VALUES
+
 func _on_dash_attack_pressed() -> void:
 	if player_turn == true:
-		#WHY IS STRENGTH INCREMEMNTING
-		#RunManager.temp_strength += 1
+		if RunManager.pro_wrestler == false:
+			RunManager.temp_defense -= 1
+		RunManager.temp_speed += 1
 			#establish base damage first
 			#use helper funcs to check if passives increase dmg below
 		var damage = 15 + RunManager.get_combined_strength() * 2
 		damage += RunManager.get_passive_bonus_damage()
+			
+		if first_attack == true and RunManager.desperate:
+			damage += 15
+			first_attack = false
+			
 			
 			#check if parry and open active
 		if parry_and_opened_active == true:
@@ -52,18 +66,25 @@ func _on_dash_attack_pressed() -> void:
 
 func _on_suplex_pressed() -> void:
 	if player_turn == true:
+		if RunManager.pro_wrestler == true:
+			RunManager.temp_strength += 1
 		RunManager.temp_defense += 1
+		var damage: int = 15 + (RunManager.get_combined_defense() + 
+		RunManager.get_combined_strength()) + RunManager.get_passive_bonus_damage()
+		
+		if first_attack == true and RunManager.desperate:
+			damage += 15
+			first_attack = false
+		
 		if parry_and_opened_active == true:
-			enemy.take_damage((15 + RunManager.get_combined_defense()
-			 + RunManager.get_combined_strength()) * 2)
+			damage *= 2
 			parry_and_opened_active = false
-			player_turn = false
-			$EndTurnTimer.start()
-		else:
-			enemy.take_damage(15 + (RunManager.get_combined_defense()
-		 	+ RunManager.get_combined_strength()))
-			player_turn = false
-			$EndTurnTimer.start()
+			
+		enemy.take_damage(damage)
+		player_turn = false
+		apply_stalwart()
+		$EndTurnTimer.start()
+		
 		print(enemy.current_health)
 		print("combined strength: ", RunManager.get_combined_strength())
 		print("combined defense: ", RunManager.get_combined_defense())
@@ -75,28 +96,34 @@ func _on_parry_and_open_pressed() -> void:
 		parry_and_opened_active = true
 		RunManager.temp_speed += 1
 		RunManager.temp_strength += 1
+		apply_stalwart()
 		player_turn = false
 		$EndTurnTimer.start()
 		
 
-#wire in lose next turn
 func _on_relentless_pursuit_pressed() -> void:
 	if player_turn == true:
+		var damage: int = 25 + (RunManager.get_combined_defense() + 
+		RunManager. get_combined_speed() + RunManager.get_combined_strength()) + RunManager.get_passive_bonus_damage()
+		
+		if first_attack == true and RunManager.desperate:
+			damage += 15
+			first_attack = false
+		
+		
 		if parry_and_opened_active == true:
-			enemy.take_damage((25 + RunManager.get_combined_defense() + 
-			RunManager.get_combined_speed() + RunManager.get_combined_strength())
-			* 2)
+			damage *= 2
 			parry_and_opened_active = false
-			player_turn = false
-			relentless_pursuit_active = true
-			$EndTurnTimer.start()
-		else:
-			enemy.take_damage(25 + (RunManager.get_combined_defense() + 
-			RunManager.get_combined_speed() + RunManager.get_combined_strength())
-			)
-			player_turn = false
-			relentless_pursuit_active = true
-			$EndTurnTimer.start()
+			
+		if RunManager.final_act:
+			damage *= 3
+			
+		enemy.take_damage(damage)
+		player_turn = false
+		apply_stalwart()
+		relentless_pursuit_active = true
+		$EndTurnTimer.start()
+		
 		print(enemy.current_health)
 
 
@@ -118,3 +145,19 @@ func _on_check_stats_pressed() -> void:
 
 func _on_close_pressed() -> void:
 	$StatsPanel.hide()
+
+
+func _on_check_passives_pressed() -> void:
+	$PassivesPanel.show()
+
+
+func _on_close_passives_button_pressed() -> void:
+	$PassivesPanel.hide()
+	
+func update_passive_panel() -> void:
+	$PassivesPanel/VBoxContainerLeft/GymRat.visible = RunManager.gym_rat
+	$PassivesPanel/VBoxContainerLeft/Desperate.visible = RunManager.desperate
+	$PassivesPanel/VBoxContainerLeft/Stalwart.visible = RunManager.stalwart
+	$PassivesPanel/VBoxContainer/Libra.visible = RunManager.libra
+	$PassivesPanel/VBoxContainer/ProWrestler.visible = RunManager.pro_wrestler
+	$PassivesPanel/VBoxContainer/FinalAct.visible = RunManager.final_act
